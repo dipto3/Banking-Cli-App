@@ -2,11 +2,11 @@
 namespace app\Controllers;
 use App\Models\User;
 class UserAuthController {
-    // private $users;
+ 
             public $usersFile = 'database/users.csv';
-            // Function to load users from file
+        
             public function loadUsers() {
-                // global $usersFile;
+                
                 $this->usersFile;
                 $users = [];
 
@@ -23,7 +23,7 @@ class UserAuthController {
                 return $users;
             }
 
-            // Function to save users to file
+            // save users to file
             public function saveUsers($users) {
                 $lines = [];
                 foreach ($users as $user) {
@@ -33,7 +33,7 @@ class UserAuthController {
                 
             }
 
-            // Function to register a new user
+            // register a new user
             public function registerUser($name, $email, $password) {
                 $this-> loadUsers();
                 $users[] = new User($name, $email, $password);
@@ -41,7 +41,7 @@ class UserAuthController {
                 $this->saveUsers($users);
                
             }
-
+            // login check
             public function loginUser($email, $password) {
                 $users = $this->loadUsers();
                 foreach ($users as $user) {
