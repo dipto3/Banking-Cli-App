@@ -2,7 +2,7 @@
 namespace app\Controllers;
 use App\Models\Admin;
 class AdminAuthController {
- 
+
             public $adminsFile = 'database/admins.csv';
         
             public function loadAdmins() {
@@ -29,17 +29,14 @@ class AdminAuthController {
                 foreach ($users as $user) {
                     $lines[] = $user->getName() . '|' . $user->getEmail() . '|' . $user->getPassword() .  PHP_EOL;
                 }
-                file_put_contents($this->adminsFile, implode(PHP_EOL, $lines),FILE_APPEND);
-                
+                file_put_contents($this->adminsFile, implode(PHP_EOL, $lines),FILE_APPEND); 
             }
 
             // register a new user
             public function registerAdmins($name, $email, $password) {
                 $this-> loadAdmins();
                 $users[] = new Admin($name, $email, $password);
-                
                 $this->saveAdmins($users);
-               
             }
             // login check
             public function loginAdmins($email, $password) {
@@ -51,6 +48,5 @@ class AdminAuthController {
                 }
                 return null;
             }
-
 }
 
