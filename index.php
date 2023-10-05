@@ -2,7 +2,7 @@
 // error_reporting(0);
 use App\Controllers\TransactionController;
 use App\Controllers\UserAuthController;
-
+use app\Models\User;
 require 'vendor/autoload.php';
 // Function to register a new user
 while (true) {
@@ -44,7 +44,8 @@ while (true) {
                             $amount = floatval(readline("Enter the amount to deposit: "));
                             $deposit = (new TransactionController)->depositMoney($user, $amount);
                             if ($deposit) {
-                                echo "Deposit successful!\n";
+                              
+                                echo "Deposit successful!Current balance is now: {$user->getBalance()}\n";
                             } else {
                                 echo "Deposit failed. Invalid amount.\n";
                             }
@@ -54,7 +55,7 @@ while (true) {
                                 $amount = floatval(readline("Enter the amount to withdraw: "));
                                 $withdraw = (new TransactionController)->withdrawMoney($user, $amount);
                                 if ($withdraw) {
-                                    echo "Withdrawal successful!\n";
+                                    echo "Withdrawal successful!Current balance is now: {$user->getBalance()}\n";
                                 } else {
                                     echo "Withdrawal failed. Insufficient balance or invalid amount.\n";
                                 }

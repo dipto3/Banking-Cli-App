@@ -37,7 +37,6 @@ class UserAuthController {
             public function registerUser($name, $email, $password) {
                 $this-> loadUsers();
                 $users[] = new User($name, $email, $password);
-                
                 $this->saveUsers($users);
                
             }

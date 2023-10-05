@@ -7,7 +7,7 @@ use App\Models\Transaction;
 class TransactionController{
     public $transactionsFile = 'database/transactions.csv';
     public $usersFile = 'database/users.csv';
-
+    
    public function loadTransactions() {
         $this->transactionsFile;
         $this->usersFile;
@@ -31,8 +31,12 @@ class TransactionController{
         
         $lines = [];
         foreach ($transactions as $transaction) {
-            $lines[] = $transaction->getUser() . '|' . $transaction->getAmount() . '|' . $transaction->getType() ;
+            $lines[] = $transaction->getUser() . '|' . $transaction->getAmount() . '|' . $transaction->getType()  ;
+            
         }
+       
+            
+      
         file_put_contents( $this->transactionsFile, implode(PHP_EOL, $lines));
     }
 
@@ -71,7 +75,6 @@ class TransactionController{
             $transactions = $this->loadTransactions();
             $transactions[]= $tran;
             $this->saveTransactions($transactions);
-            // $this->saveUsers($this->loadUsers());
             return true;
         }
         return false;
