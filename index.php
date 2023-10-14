@@ -1,78 +1,90 @@
 <?php
-// error_reporting(0);
-use App\Controllers\TransactionController;
-use App\Controllers\UserAuthController;
-use app\Models\User;
+
 require 'vendor/autoload.php';
-// Function to register a new user
-while (true) {
-    echo "Options:\n";
-    echo "1. Register\n";
-    echo "2. Login\n";
-    echo "3. Exit\n";
+use App\Controllers\UserAuthController;
+use App\Models\User;
 
-    $choice = readline("Enter your choice: ");
+class App{
+    
 
-    switch ($choice) {
-        case '1':
-            $name = readline("Enter your name: ");
-            $email = readline("Enter your email: ");
-            $password = readline("Enter your password: ");
-            (new UserAuthController)->registerUser($name, $email, $password);
-            
-            echo "Registration successful!\n";
-         
-            break;
-        case '2':
-            $email = readline("Enter your email: ");
-            $password = readline("Enter your password: ");
-            $user =  (new UserAuthController)->loginUser($email, $password);
-              if ($user !== null) {
-                
-                printf("Login successful %s !\n",$user->getName());    
-                while(true){
-                    echo "Options:\n";
-                    echo "1. Deposit Money\n";
-                    echo "2. Withdraw Money\n";
-                    echo "3. View Transactions\n";
-                    echo "4. Logout\n";
-
-                    $userChoice = readline("Enter your choice: ");
-
-                    switch($userChoice){
-                        case '1':
-                            $amount = floatval(readline("Enter the amount to deposit: "));
-                            $deposit = (new TransactionController)->depositMoney($user, $amount);
-                            if ($deposit) {
-                              
-                                echo "Deposit successful!Current balance is now: {$user->getBalance()}\n";
-                            } else {
-                                echo "Deposit failed. Invalid amount.\n";
-                            }
-                            break;
-                        
-                            case '2':
-                                $amount = floatval(readline("Enter the amount to withdraw: "));
-                                $withdraw = (new TransactionController)->withdrawMoney($user, $amount);
-                                if ($withdraw) {
-                                    echo "Withdrawal successful!Current balance is now: {$user->getBalance()}\n";
-                                } else {
-                                    echo "Withdrawal failed. Insufficient balance or invalid amount.\n";
-                                }
-                                break;    
+    public function run()
+    {
+        while (true) {
+            echo "1. Register\n2. Login\n3. Exit\n";
+            $choice = readline("Enter your choice: ");
+            switch ($choice) {
+                case '1':
+                    $username = readline("Enter username: ");
+                    $email = readline("Enter email: ");
+                    $password = readline("Enter password: ");
+                   (new UserAuthController)->register($username, $email ,$password);
+                  
+                    break;
+                case '2':
+                    $email = readline("Enter email: ");
+                    $password = readline("Enter password: ");
+                    $user =(new UserAuthController)->login($email, $password);
+                    // var_dump($user);
+                    if ($user !== null) {
+                        echo "Welcome " . $user->getUsername() . "\n";
+                        $this->loggedInMenu($user);
+                    } else {
+                        echo "Login failed. Please check credentials.\n";
                     }
-                }
-            }else{
-                echo "wrong!\n";
+                    break;
+                case '3':
+                    exit;
+                default:
+                    echo "Invalid choice. Try again.\n";
             }
+        }
+    }
 
-        break;
+    public function loggedInMenu(User $user)
+    {
+       
+        while (true) {
+            echo "1. Deposit\n2. Withdraw\n3. View Transactions\n4. View Balance\n5. Logout\n";
+            $choice = readline("Enter your choice: ");
+            switch ($choice) {
+                case '1':
+                    $amount = floatval(readline("Enter the amount to deposit: "));
+                    $user->deposit($amount);
+                        // var_dump($user);
+                        $this->saveUsersToFile();
+                        var_dump($user);
+                        $this->recordTransaction($user, 'Deposit', $amount);
+                        echo "Deposit successful.\n";
+                    
+                    break;
+                case '2':
+                    $amount = floatval(readline("Enter the amount to withdraw: "));
+                    if ($user->withdraw($amount)) {
+                        $this->saveUsersToFile();
+                        $this->recordTransaction($user, 'Withdraw', $amount);
+                        echo "Withdrawal successful.\n";
+                    } else {
+                        echo "Insufficient balance.\n";
+                    }
+                    break;
+               
+                case '4':
+                    echo "Current Balance: $" . $user->getBalance() . "\n";
+                    break;
+                case '5':
+                    return;
+                default:
+                    echo "Invalid choice. Try again.\n";
+            }
+        }
+    }
 
-        case '3':
-            exit;
-
-        default:
-            echo "Invalid choice. Please try again.\n";
-
+    private function recordTransaction(User $user, $type, $amount)
+    {
+        $transaction = "{$user->getUsername()} - $type: $amount " . "created_at: " . date('Y-m-d')."\n" ;
+        file_put_contents('database/transactions.txt', $transaction, FILE_APPEND);
     }
 }
+
+$app = new App();
+$app->run();

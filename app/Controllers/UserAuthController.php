@@ -1,55 +1,57 @@
 <?php
 namespace app\Controllers;
+use App\Controllers\UserAuthController;
 use App\Models\User;
+
 class UserAuthController {
- 
-            public $usersFile = 'database/users.csv';
-        
-            public function loadUsers() {
-                
-                $this->usersFile;
-                $users = [];
+    private $users = [];
+    
+    public function __construct()
+    {
+       
+        $this->loadUsersFromFile();
+    }
 
-                if (file_exists($this->usersFile)) {
-                    $lines = file($this->usersFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                    foreach ($lines as $line) {
-                        list($name, $email, $password, $balance) = explode('|', $line);
-                        $user = new User($name, $email, $password);
-                        $user->deposit(floatval($balance));
-                        $users[] = $user;
-                    }
-                }
+    public function saveUsersToFile()
+    {
+        $file = fopen('database/users.txt', 'w');
+        foreach ($this->users as $user) {
 
-                return $users;
-            }
+            fwrite($file, $user->getUsername() . ',' . $user->getEmail() .',' . $user->getPassword() . ',' . $user->getBalance() . "\n");
+        }
+        fclose($file);
+    }
+   
 
-            // save users to file
-            public function saveUsers($users) {
-                $lines = [];
-                foreach ($users as $user) {
-                    $lines[] = $user->getName() . '|' . $user->getEmail() . '|' . $user->getPassword() . '|' . $user->getBalance() . PHP_EOL;
-                }
-                file_put_contents($this->usersFile, implode(PHP_EOL, $lines),FILE_APPEND);
-                
-            }
 
-            // register a new user
-            public function registerUser($name, $email, $password) {
-                $this-> loadUsers();
-                $users[] = new User($name, $email, $password);
-                $this->saveUsers($users);
-               
-            }
-            // login check
-            public function loginUser($email, $password) {
-                $users = $this->loadUsers();
-                foreach ($users as $user) {
-                    if ($user->getEmail() === $email && $user->getPassword() === $password) {
-                        return $user;
-                    }
-                }
-                return null;
-            }
+    public function register($username, $email, $password)
+    {
+        if (!isset($this->users[$email])) {
+            $this->users[$email] = new User($username,$email, $password);
+            $this->saveUsersToFile();
+            echo "Registration successful.\n";
+        } else {
+            echo "Username already exists. Please choose another.\n";
+        }
+    }
+    private function loadUsersFromFile()
+    {
+        $line =[];
+        $file = fopen('database/users.txt', 'r');
+        while (($line = fgets($file)) !== false) {
+            list($username, $email, $password, $balance) = explode(',', trim($line));
+            $this->users[$username] = new User($username, $email, $password, (float)$balance);
+        }
+        fclose($file);
+    }
+    public function login($email, $password)
+    {
+        if (isset($this->users[$email]) && $this->users[$email]->getPassword() === $password) {
+            return $this->users[$email];
+        } else {
+            return null;
+        }
+    }
 
+   
 }
-
