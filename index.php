@@ -1,7 +1,7 @@
 <?php
 
 require 'vendor/autoload.php';
-use App\Controllers\UserAuthController;
+use App\Controllers\UserController;
 use App\Models\User;
 
 class App{
@@ -17,13 +17,13 @@ class App{
                     $username = readline("Enter username: ");
                     $email = readline("Enter email: ");
                     $password = readline("Enter password: ");
-                   (new UserAuthController)->register($username, $email ,$password);
+                   (new UserController)->register($username, $email ,$password);
                   
                     break;
                 case '2':
                     $email = readline("Enter email: ");
                     $password = readline("Enter password: ");
-                    $user =(new UserAuthController)->login($email, $password);
+                    $user =(new UserController)->login($email, $password);
                     // var_dump($user);
                     if ($user !== null) {
                         echo "Welcome " . $user->getUsername() . "\n";
@@ -45,13 +45,13 @@ class App{
        
         while (true) {
             echo "1. Deposit\n2. Withdraw\n3. View Transactions\n4. View Balance\n5. Logout\n";
-            $choice = readline("Enter your choice: ");
-            switch ($choice) {
+            $input = readline("Enter your choice: ");
+            switch ($input) {
                 case '1':
                     $amount = floatval(readline("Enter the amount to deposit: "));
                     $user->deposit($amount);
                         // var_dump($user);
-                        $this->saveUsersToFile();
+                        (new UserController)->saveUsersToFile();
                         var_dump($user);
                         $this->recordTransaction($user, 'Deposit', $amount);
                         echo "Deposit successful.\n";
@@ -79,11 +79,7 @@ class App{
         }
     }
 
-    private function recordTransaction(User $user, $type, $amount)
-    {
-        $transaction = "{$user->getUsername()} - $type: $amount " . "created_at: " . date('Y-m-d')."\n" ;
-        file_put_contents('database/transactions.txt', $transaction, FILE_APPEND);
-    }
+    
 }
 
 $app = new App();
