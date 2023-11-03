@@ -66,20 +66,26 @@ while (true) {
             
                 } elseif ($choice == 5) {
                     $recipientEmail = readline("Enter recipient's email: ");
-                    if (filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
-                     
-                        $amount = (float)readline("Enter the amount to transfer: ");
-                        // var_dump($users);
-                        $recipient = $userController->users[$recipientEmail] ?? null;
-           
-                        if ($recipient && $userController->transfer($user, $recipient, $amount)) {
-                            echo "Transfer successful. Your balance is now: " . $userController->viewBalance($user) . PHP_EOL;
-                        } else {
-                            echo "Transfer failed. Check recipient's email and ensure sufficient balance.\n";
+                    if (filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)){
+                       
+                        if ( $userController->isUserExists($recipientEmail)) {
+                         
+                            $amount = (float)readline("Enter the amount to transfer: ");
+                            // var_dump($users);
+                            $recipient = $userController->users[$recipientEmail] ?? null;
+               
+                            if ($recipient && $userController->transfer($user, $recipient, $amount)) {
+                                echo "Transfer successful. Your balance is now: " . $userController->viewBalance($user) . PHP_EOL;
+                            } else {
+                                echo "Transfer failed. Ensure sufficient balance.\n";
+                            }
+                        }else{
+                            echo "User not found!.\n";
                         }
                     }else{
                         echo "Invalid email format. Please enter a valid email address.\n";
                     }
+                    
                     
                 } elseif ($choice == 6) {
                     echo "Logout successful.\n";

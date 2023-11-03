@@ -85,7 +85,10 @@ class UserController
         }
     }
 
-
+    public function isUserExists($email)
+    {
+        return isset($this->users[$email]);
+    }
 
     public function loginUser($email, $password)
     {
