@@ -1,86 +1,91 @@
 <?php
-
 require 'vendor/autoload.php';
+
+
 use App\Controllers\UserController;
-use App\Models\User;
 
-class App{
+
+$userController = new UserController();
+$userController->loadUsers();
+$userController->loadTransactions();
+
+$transactions = [];
+
+while (true) {
+    echo "1. Register\n2. Login\n3. Exit\n";
+    $choice = readline("Enter your choice: ");
     
-
-    public function run()
-    {
-        while (true) {
-            echo "1. Register\n2. Login\n3. Exit\n";
-            $choice = readline("Enter your choice: ");
-            switch ($choice) {
-                case '1':
-                    $username = readline("Enter username: ");
-                    $email = readline("Enter email: ");
-                    $password = readline("Enter password: ");
-                   (new UserController)->register($username, $email ,$password);
-                  
-                    break;
-                case '2':
-                    $email = readline("Enter email: ");
-                    $password = readline("Enter password: ");
-                    $user =(new UserController)->login($email, $password);
-                    // var_dump($user);
-                    if ($user !== null) {
-                        echo "Welcome " . $user->getUsername() . "\n";
-                        $this->loggedInMenu($user);
+    if ($choice == 1) {
+        $name = readline("Name: ");
+        $email = readline("Email: ");
+        $password = readline("Password: ");
+        $userController->registerUser($name, $email, $password);
+      
+    } elseif ($choice == 2) {
+        $email = readline("Email: ");
+        $password = readline("Password: ");
+        $user = $userController->loginUser($email, $password);
+        if ($user) {
+            echo "Login successful. Welcome, " . $user->getName() . "!\n";
+            while (true) {
+                echo "1. Deposit\n2. Withdraw\n3. Check Balance\n4. Transaction History\n5. Transfer\n6. Logout\n";
+                $choice = readline("Enter your choice: ");
+                if ($choice == 1) {
+                    $amount = (float)readline("Enter the amount to deposit: ");
+                    $userController->deposit($user, $amount);
+                    echo "Deposit successful. Your balance is now: " . $userController->viewBalance($user) . PHP_EOL;
+                } elseif ($choice == 2) {
+                    $amount = (float)readline("Enter the amount to withdraw: ");
+                    if ($userController->withdraw($user, $amount)) {
+                        echo "Withdrawal successful. Your balance is now: " . $userController->viewBalance($user) . PHP_EOL;
                     } else {
-                        echo "Login failed. Please check credentials.\n";
+                        echo "Withdrawal failed. Insufficient balance.\n";
                     }
-                    break;
-                case '3':
-                    exit;
-                default:
-                    echo "Invalid choice. Try again.\n";
-            }
-        }
-    }
+                } elseif ($choice == 3) {
+                    echo "Your balance is: " . $userController->viewBalance($user) . PHP_EOL;
+                } elseif ($choice == 4) {
 
-    public function loggedInMenu(User $user)
-    {
+                    $userEmail = $user->getEmail();
+                   
+                    $userTransactionHistory = [];
+                    foreach ($userController->transactions as $transaction) {
+                        //var_dump($transaction);
+                        if ($transaction->getTransactionEmail() === $userEmail) {
+                            $userTransactionHistory[] = $transaction;
+                        }
+                    }  
+                    if (!empty($userTransactionHistory)) {
+                        echo "Transaction History for " . $user->getName() . ":\n";
+                        foreach ($userTransactionHistory as $transaction) {
+                            echo $transaction->getDetails() . PHP_EOL;
+                        }
+                    } else {
+                        echo "No transaction history found for " . $user->getName() . ".\n";
+                    }
+            
+                } elseif ($choice == 5) {
+                    $recipientEmail = readline("Enter recipient's email: ");
+                    $amount = (float)readline("Enter the amount to transfer: ");
+                    // var_dump($users);
+                    $recipient = $userController->users[$recipientEmail] ?? null;
        
-        while (true) {
-            echo "1. Deposit\n2. Withdraw\n3. View Transactions\n4. View Balance\n5. Logout\n";
-            $input = readline("Enter your choice: ");
-            switch ($input) {
-                case '1':
-                    $amount = floatval(readline("Enter the amount to deposit: "));
-                    $user->deposit($amount);
-                        // var_dump($user);
-                        (new UserController)->saveUsersToFile();
-                        var_dump($user);
-                        $this->recordTransaction($user, 'Deposit', $amount);
-                        echo "Deposit successful.\n";
-                    
-                    break;
-                case '2':
-                    $amount = floatval(readline("Enter the amount to withdraw: "));
-                    if ($user->withdraw($amount)) {
-                        $this->saveUsersToFile();
-                        $this->recordTransaction($user, 'Withdraw', $amount);
-                        echo "Withdrawal successful.\n";
+                    if ($recipient && $userController->transfer($user, $recipient, $amount)) {
+                        echo "Transfer successful. Your balance is now: " . $userController->viewBalance($user) . PHP_EOL;
                     } else {
-                        echo "Insufficient balance.\n";
+                        echo "Transfer failed. Check recipient's email and ensure sufficient balance.\n";
                     }
+                } elseif ($choice == 6) {
+                    echo "Logout successful.\n";
                     break;
-               
-                case '4':
-                    echo "Current Balance: $" . $user->getBalance() . "\n";
-                    break;
-                case '5':
-                    return;
-                default:
-                    echo "Invalid choice. Try again.\n";
+                }
             }
-        }
+        } 
+    } elseif ($choice == 3) {
+   
+        exit;
+        echo "Goodbye!\n";
+        break;
     }
-
-    
 }
 
-$app = new App();
-$app->run();
+?>
