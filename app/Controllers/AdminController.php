@@ -27,9 +27,15 @@ class AdminController
 
     public function registerAdmin($name, $email, $password)
     {
-        $admin = new Admin($name, $email, $password);
-        $this->admins[$email] = $admin;
-        $this->saveAdmins();
+        if (!isset($this->admins[$email])) {
+            $admin = new Admin($name, $email, $password);
+            $this->admins[$email] = $admin;
+            $this->saveAdmins();
+            echo "Admin Registration complete.\n";
+        }else {
+            echo "Email is already registered. Please enter a different email.\n";
+        }
+       
     }
 
     public function loginAdmin($email, $password)

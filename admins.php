@@ -17,7 +17,7 @@ while (true) {
         $email = readline("Email: ");
         $password = readline("Password: ");
         $adminController->registerAdmin($name, $email, $password);
-        echo "Registration complete.\n";
+     
     } elseif ($choice == 2) {
         $email = readline("Email: ");
         $password = readline("Password: ");
